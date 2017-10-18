@@ -19,5 +19,8 @@ public class Main {
 
         //つぶやきの実行
         //Status status = twitter.updateStatus("test for twitter4J");
+
+        System.out.print(twitter.getFavorites("soroshi_1419")+"/n");
+
     }
 }
