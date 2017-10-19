@@ -8,7 +8,7 @@ public class Main {
     {
         Twitter twitter = new TwitterFactory().getInstance();
         User user = twitter.verifyCredentials();
-        Paging paging = new Paging(1,200);
+        //Paging paging = new Paging(1,200);
 
         //ユーザ情報取得
         System.out.println("名前　　　　：" + user.getName());
@@ -20,8 +20,12 @@ public class Main {
         //Status status = twitter.updateStatus("test for twitter4J");
 
 
+        for(int i=1;i<3;i++){
+            Paging paging = new Paging(i,4);
+            System.out.print(twitter.getFavorites("soroshi_1419",paging)+"\n");
+    }
 
-        System.out.print(twitter.getFavorites("soroshi_1419",paging)+"/n");
 
+//最新ツイート　(時刻が最新に近いもの)から探すっぽい? 直観的な　現在Twitterクライアントで見ることができる""ふぁぼした順ではない""
     }
 }
