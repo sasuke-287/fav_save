@@ -1,8 +1,6 @@
-import twitter4j.Status;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.User;
+import twitter4j.*;
+
+import java.io.Serializable;
 
 public class Main {
 
@@ -10,6 +8,7 @@ public class Main {
     {
         Twitter twitter = new TwitterFactory().getInstance();
         User user = twitter.verifyCredentials();
+        Paging paging = new Paging(1,200);
 
         //ユーザ情報取得
         System.out.println("名前　　　　：" + user.getName());
@@ -20,7 +19,9 @@ public class Main {
         //つぶやきの実行
         //Status status = twitter.updateStatus("test for twitter4J");
 
-        System.out.print(twitter.getFavorites("soroshi_1419")+"/n");
+
+
+        System.out.print(twitter.getFavorites("soroshi_1419",paging)+"/n");
 
     }
 }
