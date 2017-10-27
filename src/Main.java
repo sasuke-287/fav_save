@@ -1,26 +1,13 @@
 import twitter4j.*;
+
+import java.io.File;
 import java.io.FileOutputStream;
-import  java.net.URL;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
-import twitter4j.MediaEntity;
-import twitter4j.Twitter;
-import twitter4j.TwitterException;
-import twitter4j.TwitterFactory;
-import twitter4j.Query;
-import twitter4j.QueryResult;
-import twitter4j.Status;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.io.FileOutputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.io.Serializable;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.net.URLConnection;
+
 
 public class Main {
     static final String TARGET_EXTENSION = ".jpg";
@@ -52,23 +39,49 @@ public class Main {
 
 
 
+
             Paging paging = new Paging(page, 200);
 
             fav = twitter.getFavorites("soroshi_1419", paging);
-        for (Status status : fav){
-            String userName = status.getUser().getScreenName();
-            System.out.println(userName);
+        for (Status status : fav) {
+            MediaEntity[] arrMedia = status.getMediaEntities();
+
+            for (MediaEntity media : arrMedia) {
+
+
+                System.out.println(media.getMediaURL());
+                try {
+                    URL url = new URL(media.getMediaURL());
+                    URLConnection urlConnection = url.openConnection();
+                    URLConnection urlcon =url.openConnection();
+
+                    InputStream fileIS =urlcon.getInputStream();
+                    File saveFile = new File("fav/"+media.getId()+".jpg");
+                    FileOutputStream fileOS = new FileOutputStream(saveFile);
+                    int c;
+                    while((c =fileIS.read()) != -1) fileOS.write((byte) c);
+                    fileOS.close();
+                    fileIS.close();
+
+                }catch (java.net.MalformedURLException e){
+                    e.printStackTrace();
+                }
+                catch (java.io.IOException e){
+                    e.printStackTrace();
+                }
+            }
         }
 
 
 
 
 
-//最新ツイート　(時刻が最新に近いもの)から探すっぽい? 直観的な　現在Twitterクライアントで見ることができる""ふぁぼした順ではない""
 
-        //拾ってきたものをjsonに変換→extended_entities.media[0]を抽出すれば画像URLを取得できる　すれをwgetなどで保存?
-        //APIに対して画像ふぁぼできるのが少なそう
-        //最近ふぁぼった順で探したいよね
-            //ふぁぼった順は無理そう IFTTTもそうなってた
+/*
+画像をfavディレクトリに保存するのはできた
+        現状の課題
+        ・複数画像投稿
+        ・取得できなかった時の例外処理
+        ・取得しないブラックリスト処理
     }
 }
