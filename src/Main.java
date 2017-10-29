@@ -10,29 +10,23 @@ import java.net.URLConnection;
 
 
 public class Main {
-    static final String TARGET_EXTENSION = ".jpg";
+
 
     public static void main( String[] args ) throws TwitterException{
 
         Twitter twitter = new TwitterFactory().getInstance();
         User user = twitter.verifyCredentials();
-        //Paging paging = new Paging(1,200);
 
         //ユーザ情報取得
+        System.out.println("ログインしているユーザー情報");
         System.out.println("名前　　　　：" + user.getName());
         System.out.println("表示名　　　：" + user.getScreenName());
         System.err.println("フォロー数　：" + user.getFriendsCount());
         System.out.println("フォロワー数：" + user.getFollowersCount());
-
-        //つぶやきの実行
-        //Status status = twitter.updateStatus("test for twitter4J");
+        System.out.println("--------------------------------------");
 
 
-        /*for(int i=1;i<3;i++){
-            Paging paging = new Paging(i,4);
-            System.out.print(twitter.getFavorites("soroshi_1419",paging)+"\n");
-    }
-    */
+        
         ResponseList<Status> fav = null;
         int page =1;
         int total = 0;
@@ -88,9 +82,11 @@ public class Main {
 
                 }catch (java.net.MalformedURLException e){
                     e.printStackTrace();
+                    System.out.print("無効なURL");
                 }
                 catch (java.io.IOException e){
                     e.printStackTrace();
+                    System.out.print("入出力エラー");
                 }
             }
         }
