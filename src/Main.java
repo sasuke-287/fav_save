@@ -38,30 +38,53 @@ public class Main {
         int total = 0;
 
 
+        //Paging paging = new Paging(page, 10);
+        Paging paging = new Paging(page, 200);
 
-
-            Paging paging = new Paging(page, 200);
-
-            fav = twitter.getFavorites("soroshi_1419", paging);
+        fav = twitter.getFavorites("soroshi_1419", paging);
         for (Status status : fav) {
             MediaEntity[] arrMedia = status.getMediaEntities();
+            MediaEntity[] exMedia = status.getExtendedMediaEntities();
 
-            for (MediaEntity media : arrMedia) {
+            for (MediaEntity media : exMedia) {
 
-
-                System.out.println(media.getMediaURL());
+                //System.out.println(exMedia.length);
+                //System.out.println(media.getMediaURL());
                 try {
-                    URL url = new URL(media.getMediaURL());
-                    URLConnection urlConnection = url.openConnection();
-                    URLConnection urlcon =url.openConnection();
 
-                    InputStream fileIS =urlcon.getInputStream();
-                    File saveFile = new File("fav/"+media.getId()+".jpg");
-                    FileOutputStream fileOS = new FileOutputStream(saveFile);
-                    int c;
-                    while((c =fileIS.read()) != -1) fileOS.write((byte) c);
-                    fileOS.close();
-                    fileIS.close();
+                    if(exMedia.length != 1) {
+                        File newdir = new File("fav/"+status.getUser().getScreenName()+"_"+media.getId());
+                        newdir.mkdir();
+
+                        for(int i=0; i<exMedia.length; i++) {
+
+                            URL url = new URL(media.getMediaURL());
+                            URLConnection urlConnection = url.openConnection();
+                            URLConnection urlcon = url.openConnection();
+
+                            InputStream fileIS = urlcon.getInputStream();
+                            File saveFile = new File("fav/" + status.getUser().getScreenName() + "_" + media.getId() + "/"+ i + ".jpg");
+                            FileOutputStream fileOS = new FileOutputStream(saveFile);
+                            int c;
+                            while ((c = fileIS.read()) != -1) fileOS.write((byte) c);
+                            fileOS.close();
+                            fileIS.close();
+                        }
+                    }else {
+
+
+                        URL url = new URL(media.getMediaURL());
+                        URLConnection urlConnection = url.openConnection();
+                        URLConnection urlcon = url.openConnection();
+
+                        InputStream fileIS = urlcon.getInputStream();
+                        File saveFile = new File("fav/" + status.getUser().getScreenName() + "_" + media.getId() + ".jpg");
+                        FileOutputStream fileOS = new FileOutputStream(saveFile);
+                        int c;
+                        while ((c = fileIS.read()) != -1) fileOS.write((byte) c);
+                        fileOS.close();
+                        fileIS.close();
+                    }
 
                 }catch (java.net.MalformedURLException e){
                     e.printStackTrace();
