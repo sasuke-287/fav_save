@@ -1,18 +1,16 @@
 import twitter4j.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 
 public class Main {
 
 
-    public static void main( String[] args ) throws TwitterException{
+    public static void main(String[] args) throws TwitterException {
 
         Twitter twitter = new TwitterFactory().getInstance();
         User user = twitter.verifyCredentials();
@@ -25,83 +23,132 @@ public class Main {
         System.out.println("フォロワー数：" + user.getFollowersCount());
         System.out.println("--------------------------------------");
 
+        getfavmedia("soroshi_1419");
+    }
 
-        
+
+    private static String getfavmedia(String user) throws TwitterException {
+
+        //生成
+        Twitter twitter = new TwitterFactory().getInstance();
+
+        //リストの初期化
         ResponseList<Status> fav = null;
-        int page =1;
+        int page = 1;
         int total = 0;
 
-
-        //Paging paging = new Paging(page, 10);
+        //何ツイートとるかの設定 後で設定できるようにするかも
         Paging paging = new Paging(page, 200);
 
-        fav = twitter.getFavorites("soroshi_1419", paging);
+        //ブラックリストの取得
+        ArrayList<String> blacklist = new ArrayList<String>();
+        try {
+            blacklist = setBlacklist();
+        } catch (FileNotFoundException e) {
+            System.out.println("ブラックリストが見つかりません");
+        }
+
+        //fav取得
+        fav = twitter.getFavorites(user, paging);
         for (Status status : fav) {
-            MediaEntity[] arrMedia = status.getMediaEntities();
-            MediaEntity[] exMedia = status.getExtendedMediaEntities();
+
+
+            MediaEntity[] exMedia = status.getExtendedMediaEntities(); //各ツイートのメディア欄を取得
 
             for (MediaEntity media : exMedia) {
+                if (!blacklist.contains(status.getUser().getScreenName())) {
 
-                //System.out.println(exMedia.length);
-                //System.out.println(media.getMediaURL());
-                try {
+                    //デバック用
+                    //System.out.println(exMedia.length);
+                    //System.out.println(media.getMediaURL());
+                    try {
 
-                    if(exMedia.length != 1) {
-                        File newdir = new File("fav/"+status.getUser().getScreenName()+"_"+media.getId());
-                        newdir.mkdir();
+                        //画像が複数の場合
+                        if (exMedia.length != 1) {
+                            File newdir = new File("fav/" + status.getUser().getScreenName() + "_" + status.getId()); //ツイート主のID+ツイートidのディレクトリを作成
+                            if (newdir.exists() == false) {
+                                newdir.mkdir();
+                            }
 
-                        for(int i=0; i<exMedia.length; i++) {
+                            for (int i = 0; i < exMedia.length; i++) {
+                                MediaEntity mediaEntity = exMedia[i];
+
+                                URL url = new URL(mediaEntity.getMediaURL());
+                                URLConnection urlConnection = url.openConnection();
+                                URLConnection urlcon = url.openConnection();
+
+                                InputStream fileIS = urlcon.getInputStream();
+                                File saveFile = new File("fav/" + status.getUser().getScreenName() + "_" + status.getId() + "/" + i + ".jpg");//添え字で保存
+                                FileOutputStream fileOS = new FileOutputStream(saveFile);
+                                int c;
+                                while ((c = fileIS.read()) != -1) fileOS.write((byte) c);
+                                fileOS.close();
+                                fileIS.close();
+                            }
+                        } else {
+                            //画像が1枚の場合
+
 
                             URL url = new URL(media.getMediaURL());
                             URLConnection urlConnection = url.openConnection();
                             URLConnection urlcon = url.openConnection();
 
                             InputStream fileIS = urlcon.getInputStream();
-                            File saveFile = new File("fav/" + status.getUser().getScreenName() + "_" + media.getId() + "/"+ i + ".jpg");
+                            File saveFile = new File("fav/" + status.getUser().getScreenName() + "_" + status.getId() + ".jpg"); //ツイート主のID+ツイートIDで保存
                             FileOutputStream fileOS = new FileOutputStream(saveFile);
                             int c;
                             while ((c = fileIS.read()) != -1) fileOS.write((byte) c);
                             fileOS.close();
                             fileIS.close();
+
                         }
-                    }else {
+                        total++;
+                        System.out.println(total + "件目の画像を取得しています");
 
-
-                        URL url = new URL(media.getMediaURL());
-                        URLConnection urlConnection = url.openConnection();
-                        URLConnection urlcon = url.openConnection();
-
-                        InputStream fileIS = urlcon.getInputStream();
-                        File saveFile = new File("fav/" + status.getUser().getScreenName() + "_" + media.getId() + ".jpg");
-                        FileOutputStream fileOS = new FileOutputStream(saveFile);
-                        int c;
-                        while ((c = fileIS.read()) != -1) fileOS.write((byte) c);
-                        fileOS.close();
-                        fileIS.close();
+                    } catch (java.net.MalformedURLException e) {
+                        e.printStackTrace();
+                        System.out.print("無効なURL");
+                    } catch (java.io.IOException e) {
+                        e.printStackTrace();
+                        System.out.print("入出力エラー");
                     }
-
-                }catch (java.net.MalformedURLException e){
-                    e.printStackTrace();
-                    System.out.print("無効なURL");
-                }
-                catch (java.io.IOException e){
-                    e.printStackTrace();
-                    System.out.print("入出力エラー");
                 }
             }
         }
+        return (total + "件の画像を保存しました");
+    }
 
 
+    private static ArrayList<String> setBlacklist() throws FileNotFoundException {
+        ArrayList<String> blacklist = new ArrayList<>();
+        FileReader fileReader = new FileReader("blacklist.txt");
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
 
 
+        try {
+            //ファイル読み込み準備
 
 
-/*
-画像をfavディレクトリに保存するのはできた
-        現状の課題
-        ・複数画像投稿
-        ・取得できなかった時の例外処理
-        ・取得しないブラックリスト処理
-        */
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+               blacklist.add(line);
+               System.out.println(line);
+            }
+
+
+        } catch (FileNotFoundException e) {
+            System.out.println("ブラックリストファイルが見つかりません");
+            System.out.println("使用する場合はblacklist.txtを作成してください。");
+            return null;
+        } catch (IOException e) {
+            System.out.println("入出力エラー");
+        }
+        try {
+            bufferedReader.close();
+        } catch (IOException e) {
+            System.out.println("入出力エラー");
+        }
+        System.out.println("ブラックリストを読み込みました");
+        return blacklist;
     }
 }
