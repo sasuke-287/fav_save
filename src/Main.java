@@ -1,4 +1,6 @@
 import twitter4j.*;
+import twitter4j.auth.AccessToken;
+import twitter4j.auth.RequestToken;
 
 import java.io.*;
 import java.net.URL;
@@ -10,27 +12,57 @@ import java.util.Arrays;
 public class Main {
 
 
-    public static void main(String[] args) throws TwitterException {
+    public static void main(String[] args) throws TwitterException, IOException {
 
-        Twitter twitter = new TwitterFactory().getInstance();
+        //Twitter twitter = new TwitterFactory().getInstance();
+        //User user = twitter.verifyCredentials();
+
+        Twitter twitter =TwitterFactory.getSingleton();
+
+
+
+        RequestToken requestToken = twitter.getOAuthRequestToken();
+        AccessToken accessToken = null;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        while (null == accessToken) {
+            System.out.println("Open the following URL and grant access to your account:");
+            System.out.println(requestToken.getAuthorizationURL());
+            System.out.print("Enter the PIN(if aviailable) or just hit enter.[PIN]:");
+            String pin = br.readLine();
+            try{
+                if(pin.length() > 0){
+                    accessToken = twitter.getOAuthAccessToken(requestToken, pin);
+                }else{
+                    accessToken = twitter.getOAuthAccessToken();
+                }
+            } catch (TwitterException te) {
+                if(401 == te.getStatusCode()){
+                    System.out.println("Unable to get the access token.");
+                }else{
+                    te.printStackTrace();
+                }
+            }
+        }
+
+
+
         User user = twitter.verifyCredentials();
-
         //ユーザ情報取得
         System.out.println("ログインしているユーザー情報");
         System.out.println("名前　　　　：" + user.getName());
         System.out.println("表示名　　　：" + user.getScreenName());
-        System.err.println("フォロー数　：" + user.getFriendsCount());
+        System.out.println("フォロー数　：" + user.getFriendsCount());
         System.out.println("フォロワー数：" + user.getFollowersCount());
         System.out.println("--------------------------------------");
 
-        getfavmedia("soroshi_1419");
+        getfavmedia(user.getScreenName());
     }
 
 
     private static String getfavmedia(String user) throws TwitterException {
 
         //生成
-        Twitter twitter = new TwitterFactory().getInstance();
+        Twitter twitter =TwitterFactory.getSingleton();
 
         //リストの初期化
         ResponseList<Status> fav = null;
@@ -124,7 +156,7 @@ public class Main {
         FileReader fileReader = new FileReader("blacklist.txt");
         BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-
+        System.out.println("ブラックリストを読み込みます");
         try {
             //ファイル読み込み準備
 
@@ -151,4 +183,5 @@ public class Main {
         System.out.println("ブラックリストを読み込みました");
         return blacklist;
     }
+
 }
