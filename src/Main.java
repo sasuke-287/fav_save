@@ -6,7 +6,6 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class Main {
@@ -16,6 +15,7 @@ public class Main {
 
         //Twitter twitter = new TwitterFactory().getInstance();
         //User user = twitter.verifyCredentials();
+        int serachnum = 1;//MAX15ページ　(1+15)*200=3200ツイートまで 追加するページ数を指定する
 
         Twitter twitter = TwitterFactory.getSingleton();
 
@@ -54,11 +54,11 @@ public class Main {
         System.out.println("--------------------------------------");
 
         //getfavmedia(user.getScreenName());
-        getfavmedia("soroshi_1419");
+        getfavmedia("soroshi_1419", serachnum);
     }
 
 
-    private static String getfavmedia(String user) throws TwitterException {
+    private static String getfavmedia(String user, int serachnum) throws TwitterException {
 
         //生成
         Twitter twitter = TwitterFactory.getSingleton();
@@ -67,7 +67,7 @@ public class Main {
         ResponseList<Status> fav = null;
         int page = 1;
         int total = 0;
-        int serachpages = 16;//MAX16ページ　16*200=3200ツイートまで
+        int serachpages = serachnum +1 ;//MAX16ページ　16*200=3200ツイートまで
 
 
         //ブラックリストの取得
