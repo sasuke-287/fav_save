@@ -15,7 +15,7 @@ public class Main {
 
         //Twitter twitter = new TwitterFactory().getInstance();
         //User user = twitter.verifyCredentials();
-        int serachnum = 1;//MAX15ページ　(1+15)*200=3200ツイートまで 追加するページ数を指定する
+        int serachnum = -1;//MAX15ページ　(1+15)*200=3200ツイートまで 追加するページ数を指定する
 
         Twitter twitter = TwitterFactory.getSingleton();
 
@@ -24,9 +24,9 @@ public class Main {
         AccessToken accessToken = null;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         while (null == accessToken) {
-            System.out.println("Open the following URL and grant access to your account:");
+            System.out.println("URLを開き、認証してください:");
             System.out.println(requestToken.getAuthorizationURL());
-            System.out.print("Enter the PIN(if aviailable) or just hit enter.[PIN]:");
+            System.out.print("認証ページに出るPINを入力してください。[PIN]:");
             String pin = br.readLine();
             try {
                 if (pin.length() > 0) {
@@ -36,12 +36,32 @@ public class Main {
                 }
             } catch (TwitterException te) {
                 if (401 == te.getStatusCode()) {
-                    System.out.println("Unable to get the access token.");
+                    System.out.println("アクセストークンを取得できませんでした");
                 } else {
                     te.printStackTrace();
                 }
             }
         }
+
+        if(serachnum ==-1) {
+            System.out.println("何ツイート分検索しますか(200刻み/最大3200まで)");
+            try {
+                serachnum = Integer.parseInt(br.readLine());
+                if (serachnum == 200 || serachnum == 400 || serachnum == 600 || serachnum == 800 || serachnum == 1000 ||
+                        serachnum == 1200 || serachnum == 1400 || serachnum == 1600 || serachnum == 1800 || serachnum == 2000 ||
+                        serachnum == 2200 || serachnum == 2400 || serachnum == 2600 || serachnum == 2800 || serachnum == 3000 || serachnum == 3200 || serachnum == 3400 || serachnum == 3600) {
+                    serachnum = serachnum / 200;
+                    System.out.println(serachnum + "件から取得します。");
+                } else {
+                    System.out.println("無効な値が入力されました。200件を取得します。");
+                    serachnum=1;
+                }
+            }catch (NumberFormatException e){
+                System.out.println("無効な値が入力されました。200件を取得します。");
+                serachnum=1;
+            }
+        }
+
 
 
         User user = twitter.verifyCredentials();
@@ -53,12 +73,12 @@ public class Main {
         System.out.println("フォロワー数：" + user.getFollowersCount());
         System.out.println("--------------------------------------");
 
-        //getfavmedia(user.getScreenName());
-        getfavmedia("soroshi_1419", serachnum);
+        getfavmedia(user.getScreenName(),serachnum);
+        //getfavmedia("soroshi_1419", serachnum);
     }
 
 
-    private static String getfavmedia(String user, int serachnum) throws TwitterException {
+    private static String  getfavmedia(String user, int serachnum) throws TwitterException {
 
         //生成
         Twitter twitter = TwitterFactory.getSingleton();
@@ -67,7 +87,7 @@ public class Main {
         ResponseList<Status> fav = null;
         int page = 1;
         int total = 0;
-        int serachpages = serachnum +1 ;//MAX16ページ　16*200=3200ツイートまで
+        //MAX16ページ　16*200=3200ツイートまで
 
 
         //ブラックリストの取得
@@ -78,10 +98,10 @@ public class Main {
             System.out.println("ブラックリストが見つかりません");
         }
 
-        for (page = 1; page < serachpages; page++) {
-
+        do {
             //何ツイートとるかの設定 後で設定できるようにするかも
             Paging paging = new Paging(page, 200);
+            page++;
 
 
             //fav取得
@@ -102,7 +122,7 @@ public class Main {
                             //画像が複数の場合
                             if (exMedia.length != 1) {
                                 File newdir = new File("fav/" + status.getUser().getScreenName() + "_" + status.getId()); //ツイート主のID+ツイートidのディレクトリを作成
-                                if (newdir.exists() == false) {
+                                if (!newdir.exists()) {
                                     newdir.mkdir();
                                 }
 
@@ -151,8 +171,7 @@ public class Main {
                     }
                 }
             }
-
-        }
+        }while (page >serachnum);
         return (total + "件の画像を保存しました");
     }
 
