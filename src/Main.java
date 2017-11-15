@@ -12,6 +12,8 @@ public class Main {
 
 
     public static void main(String[] args) throws TwitterException, IOException {
+        System.out.println("本プログラムは、Apache License, Version 2.0(http://www.apache.org/licenses/LICENSE-2.0)の下で提供されるTwitter4J http://twitter4j.org/ のソースコードを使用しています。");
+
 
         //Twitter twitter = new TwitterFactory().getInstance();
         //User user = twitter.verifyCredentials();
@@ -51,7 +53,7 @@ public class Main {
                         serachnum == 1200 || serachnum == 1400 || serachnum == 1600 || serachnum == 1800 || serachnum == 2000 ||
                         serachnum == 2200 || serachnum == 2400 || serachnum == 2600 || serachnum == 2800 || serachnum == 3000 || serachnum == 3200 || serachnum == 3400 || serachnum == 3600) {
                     serachnum = serachnum / 200;
-                    System.out.println(serachnum + "件から取得します。");
+                    System.out.println(serachnum*200 + "件から取得します。");
                 } else {
                     System.out.println("無効な値が入力されました。200件を取得します。");
                     serachnum=1;
@@ -82,6 +84,8 @@ public class Main {
 
         //生成
         Twitter twitter = TwitterFactory.getSingleton();
+        File favfile = new File("fav");
+        favfile.mkdir();
 
         //リストの初期化
         ResponseList<Status> fav = null;
