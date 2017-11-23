@@ -12,7 +12,8 @@ public class Main {
 
 
     public static void main(String[] args) throws TwitterException, IOException {
-        System.out.println("本プログラムは、Apache License, Version 2.0(http://www.apache.org/licenses/LICENSE-2.0)の下で提供されるTwitter4J http://twitter4j.org/ のソースコードを使用しています。");
+        System.out.println("本プログラムは、Apache License, Version 2.0(http://www.apache.org/licenses/LICENSE-2.0)の下で提供される");
+        System.out.println("Twitter4J http://twitter4j.org/ のソースコードを使用しています。");
 
 
         //Twitter twitter = new TwitterFactory().getInstance();
@@ -175,7 +176,7 @@ public class Main {
                     }
                 }
             }
-        }while (page >serachnum);
+        }while (page < serachnum);
         return (total + "件の画像を保存しました");
     }
 
